@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist Audit Aset — Aseta</title>
+<style>
+  :root {
+    --surface: #fcfcfb;
+    --page: #f4f3ef;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --line: #c3c2b7;
+    --blue: #2a78d6;
+    --blue-soft: #eaf2fc;
+    --good: #0ca30c;
+    --warn: #fab219;
+    --bad: #d03b3b;
+    --chip: #f0efec;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 12.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sheet {
+    max-width: 860px;
+    margin: 24px auto;
+    background: var(--surface);
+    border: 1px solid var(--grid);
+    border-radius: 12px;
+    padding: 32px 36px 28px;
+    box-shadow: 0 1px 2px rgba(11,11,11,0.04), 0 12px 32px rgba(11,11,11,0.06);
+  }
+  .brand {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 20px;
+  }
+  .brand .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
+  .brand .logo span { color: var(--blue); }
+  .brand .meta { font-size: 10.5px; color: var(--muted); text-align: right; line-height: 1.4; }
+  h1 { font-size: 23px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--ink-2); margin: 0 0 16px; font-size: 12.5px; }
+
+  .cust {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px;
+    background: var(--chip); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+  }
+  .cust label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px; }
+  .cust input {
+    width: 100%; border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
+    font-family: inherit; font-size: 12.5px; background: var(--surface); color: var(--ink);
+  }
+  .cust input:focus { outline: 2px solid var(--blue); outline-offset: 1px; border-color: var(--blue); }
+
+  .sticky-score {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--surface); border: 1px solid var(--grid); border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 4px 14px rgba(11,11,11,0.06);
+  }
+  .sticky-score .score-num { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .sticky-score .score-num small { font-size: 11px; font-weight: 600; color: var(--muted); }
+  .sticky-score .band { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--chip); color: var(--ink-2); white-space: nowrap; }
+  .sticky-score .prog-wrap { flex: 1; }
+  .sticky-score .prog-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .sticky-score .prog { height: 7px; background: var(--chip); border-radius: 4px; overflow: hidden; }
+  .sticky-score .prog > div { height: 100%; width: 0%; background: var(--blue); border-radius: 4px; transition: width 0.2s ease; }
+
+  .howto {
+    background: var(--blue-soft); border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0; padding: 11px 14px; margin: 0 0 18px;
+    font-size: 11.5px; color: var(--ink-2);
+  }
+  .howto b { color: var(--ink); }
+  .howto .scale { display: flex; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
+  .howto .scale span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+  h2 {
+    font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.06em;
+    margin: 20px 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--grid);
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2 .letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 6px; background: var(--ink);
+    color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: 0;
+  }
+  h2 .sec-score { margin-left: auto; font-size: 10.5px; color: var(--muted); letter-spacing: 0; text-transform: none; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+  th {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--muted); font-weight: 700; text-align: left;
+  }
+  th.c, td.c { text-align: center; }
+  td.no { color: var(--muted); font-variant-numeric: tabular-nums; }
+  td.point { font-size: 11.5px; }
+  .note-col { width: 24%; }
+  .note-input {
+    width: 100%; border: 0; border-bottom: 1px dotted var(--line); background: transparent;
+    font-family: inherit; font-size: 11px; color: var(--ink); padding: 3px 0;
+  }
+  .note-input:focus { outline: none; border-bottom-color: var(--blue); }
+
+  .seg { display: inline-flex; gap: 4px; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 27px; height: 25px; border: 1px solid var(--line); border-radius: 6px;
+    font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer;
+    background: var(--surface); user-select: none; transition: all 0.12s ease;
+  }
+  .seg label:hover { border-color: var(--ink); color: var(--ink); }
+  .seg input:checked + label { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .seg input:focus-visible + label { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+  .score {
+    margin-top: 22px; border: 1.5px solid var(--ink); border-radius: 10px;
+    padding: 16px 18px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px;
+  }
+  .score .total { border-right: 1px solid var(--grid); padding-right: 18px; }
+  .score .total .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
+  .score .total .big { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin: 4px 0 2px; }
+  .score .total .of { font-size: 11px; color: var(--ink-2); }
+  .score .bands { display: grid; gap: 6px; }
+  .band-row { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: baseline; font-size: 11px; }
+  .band-row .range { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .band-row .desc { color: var(--ink-2); }
+  .band-row .desc b { color: var(--ink); }
+  .band-row.active { background: var(--blue-soft); border-radius: 6px; padding: 3px 6px; margin: -3px -6px; }
+
+  .actions {
+    margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 9px; padding: 11px 16px; font-family: inherit; font-size: 12.5px;
+    font-weight: 700; cursor: pointer; transition: all 0.12s ease;
+  }
+  .btn:hover { border-color: var(--ink); }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.primary:hover { opacity: 0.9; }
+  .btn.wa { background: #25d366; color: #063b1c; border-color: #25d366; }
+  .btn.wa:hover { opacity: 0.92; }
+  .btn.ghost { background: transparent; }
+  .actions .hint { font-size: 10.5px; color: var(--muted); margin-left: auto; }
+
+  .cta {
+    margin-top: 20px; background: var(--ink); color: #fff; border-radius: 10px;
+    padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .cta .t { font-size: 13px; font-weight: 700; margin: 0 0 2px; }
+  .cta .d { font-size: 11px; opacity: 0.8; margin: 0; }
+  .cta .contact { text-align: right; font-size: 11px; line-height: 1.5; white-space: nowrap; }
+  .cta .contact b { font-size: 12.5px; }
+
+  .foot { margin-top: 16px; font-size: 9.5px; color: var(--muted); display: flex; justify-content: space-between; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 9px;
+    font-size: 12px; opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 700px) {
+    .sheet { padding: 22px 18px; margin: 0; border-radius: 0; }
+    .cust { grid-template-columns: 1fr; }
+    .score { grid-template-columns: 1fr; }
+    .score .total { border-right: 0; border-bottom: 1px solid var(--grid); padding: 0 0 12px; }
+    .sticky-score { flex-wrap: wrap; }
+    .actions .hint { margin-left: 0; width: 100%; }
+  }
+  @media print {
+    body { background: #fff; }
+    .sheet { margin: 0; border: 0; border-radius: 0; box-shadow: none; padding: 0; max-width: none; }
+    @page { size: A4; margin: 12mm; }
+    .sticky-score { position: static; box-shadow: none; }
+    .actions, .toast { display: none; }
+    h2 { break-after: avoid; }
+    tr { break-inside: avoid; }
+    .score, .cta { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="brand">
+    <div class="logo">aseta<span>.</span></div>
+    <div class="meta">Asset Management · RFID<br>aseta.id · 0812-1798-4959</div>
+  </div>
+
+  <h1>Checklist Audit Aset — 25 Poin Pemeriksaan</h1>
+  <p class="sub">Isi sesuai kondisi perusahaan Anda. Skor dan interpretasi terhitung otomatis, lalu kirim hasilnya ke tim Aseta lewat WhatsApp.</p>
+
+  <div class="cust">
+    <div><label for="custName">Nama</label><input id="custName" type="text" placeholder="Nama Anda" autocomplete="name"></div>
+    <div><label for="custCompany">Perusahaan</label><input id="custCompany" type="text" placeholder="Nama perusahaan" autocomplete="organization"></div>
+    <div><label for="custRole">Jabatan</label><input id="custRole" type="text" placeholder="Mis. Manajer Operasional"></div>
+    <div><label for="custPhone">WhatsApp</label><input id="custPhone" type="tel" placeholder="08xx" autocomplete="tel"></div>
+  </div>
+
+  <div class="sticky-score">
+    <div class="score-num"><span id="totalScore">0</span><small>/50</small></div>
+    <div class="band" id="bandLabel">Belum diisi</div>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Progres pengisian</span><span id="progText">0/25</span></div>
+      <div class="prog"><div id="progBar"></div></div>
+    </div>
+  </div>
+
+  <div class="howto">
+    <b>Cara pakai:</b> pilih skor untuk setiap poin sesuai kondisi saat ini.
+    <div class="scale">
+      <span><i class="dot" style="background:var(--bad)"></i> <b>0</b> — Belum ada / tidak dilakukan</span>
+      <span><i class="dot" style="background:var(--warn)"></i> <b>1</b> — Sebagian / tidak konsisten</span>
+      <span><i class="dot" style="background:var(--good)"></i> <b>2</b> — Sudah / konsisten</span>
+    </div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="score">
+    <div class="total">
+      <div class="label">Total skor</div>
+      <div class="big" id="bigScore">0</div>
+      <div class="of">dari maksimal 50</div>
+    </div>
+    <div class="bands" id="bands">
+      <div class="band-row" data-band="0"><span class="range" style="color:var(--bad)">0–20</span><span class="desc"><b>Risiko tinggi.</b> Data aset belum bisa diandalkan; prioritaskan pembenahan dasar.</span></div>
+      <div class="band-row" data-band="1"><span class="range" style="color:#b07a00">21–35</span><span class="desc"><b>Berkembang.</b> Sudah ada dasar, tapi masih manual/terpencar.</span></div>
+      <div class="band-row" data-band="2"><span class="range" style="color:var(--good)">36–45</span><span class="desc"><b>Matang.</b> Siap digitalisasi dan integrasi lintas tim.</span></div>
+      <div class="band-row" data-band="3"><span class="range" style="color:var(--blue)">46–50</span><span class="desc"><b>Best practice.</b> Fokus optimasi, otomasi, dan analitik.</span></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn wa" id="btnWa" type="button">Kirim ke Sales via WhatsApp</button>
+    <button class="btn" id="btnCopy" type="button">Salin Hasil</button>
+    <button class="btn ghost" id="btnPrint" type="button">Cetak / Simpan PDF</button>
+    <button class="btn ghost" id="btnReset" type="button">Reset</button>
+    <span class="hint">Hasil akan terisi otomatis di WhatsApp — tinggal tekan kirim.</span>
+  </div>
+
+  <div class="cta">
+    <div>
+      <p class="t">Butuh bantu audit pencatatan aset?</p>
+      <p class="d">Tim Aseta siap bantu sesi 30 menit — petakan temuan dan langkah perbaikannya.</p>
+    </div>
+    <div class="contact">
+      <b>0812-1798-4959</b><br>aseta.id
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Checklist Audit Aset · Aseta</span>
+    <span>Versi 1.1 · 2026</span>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Tersalin</div>
+
+<script>
+(function () {
+  var SALES_WA = '6281217984959';
+
+  var SECTIONS = [
+    { letter: 'A', title: 'Data & Identitas Aset', items: [
+      'Setiap aset punya kode unik yang konsisten dan tidak duplikat.',
+      'Nama, kategori, dan spesifikasi aset tercatat lengkap.',
+      'Lokasi aset (gedung/lantai/ruang) tercatat dan diperbarui.',
+      'Penanggung jawab (PIC) setiap aset jelas dan tercatat.',
+      'Foto dan dokumen pendukung (invoice, garansi, manual) tersimpan.'
+    ]},
+    { letter: 'B', title: 'Pencatatan & Stock Opname', items: [
+      'Jadwal stock opname rutin ditetapkan (minimal 1x per tahun).',
+      'Metode opname jelas: manual, scan barcode, atau RFID.',
+      'Selisih opname dicatat dan direkonsiliasi dengan data sistem.',
+      'Berita acara opname ditandatangani pihak berwenang.',
+      'Waktu penyelesaian opname terukur (target vs realisasi).'
+    ]},
+    { letter: 'C', title: 'Pelacakan & Mutasi Aset', items: [
+      'Mutasi aset (pindah lokasi/PIC) tercatat dan disetujui.',
+      'Aset hilang/tidak ditemukan punya prosedur pelaporan.',
+      'Aset keluar/masuk (disposal, hibah, jual) terdokumentasi.',
+      'Pelacakan fisik memakai barcode/QR/RFID (jika sudah ada).',
+      'Riwayat perpindahan aset bisa ditelusuri kapan saja.'
+    ]},
+    { letter: 'D', title: 'Maintenance & Kondisi Aset', items: [
+      'Jadwal perawatan preventif tersedia per kategori aset.',
+      'Riwayat perbaikan dan biaya maintenance tercatat.',
+      'Kondisi aset (baik/rusak/rusak berat) diperbarui berkala.',
+      'Kalibrasi/sertifikasi aset kritikal terjadwal.',
+      'Downtime aset kritikal dipantau dan dianalisis.'
+    ]},
+    { letter: 'E', title: 'Nilai, Pelaporan & Governance', items: [
+      'Metode penyusutan konsisten dan sesuai kebijakan akuntansi.',
+      'Nilai buku dan umur ekonomis aset diperbarui.',
+      'Laporan aset bulanan/tahunan tersedia tepat waktu.',
+      'Akses dan hak edit data aset dibatasi (role-based).',
+      'Audit trail perubahan data aset tersimpan.'
+    ]}
+  ];
+
+  var TOTAL_ITEMS = SECTIONS.reduce(function (n, s) { return n + s.items.length; }, 0);
+
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+
+  function render() {
+    var host = document.getElementById('sections');
+    var idx = 0;
+    SECTIONS.forEach(function (sec, si) {
+      var h = el('h2');
+      h.innerHTML = '<span class="letter">' + sec.letter + '</span> ' + sec.title +
+        '<span class="sec-score" id="secScore-' + si + '">0/10</span>';
+      host.appendChild(h);
+
+      var table = el('table');
+      var thead = el('thead');
+      thead.innerHTML = '<tr><th style="width:6%">No</th><th>Poin pemeriksaan</th>' +
+        '<th class="c" style="width:7%">0</th><th class="c" style="width:7%">1</th>' +
+        '<th class="c" style="width:7%">2</th><th class="note-col">Catatan</th></tr>';
+      table.appendChild(thead);
+
+      var tbody = el('tbody');
+      sec.items.forEach(function (text, ii) {
+        var tr = el('tr');
+        var no = el('td', 'no', String(idx + 1));
+        var point = el('td', 'point', text);
+        var c0 = el('td', 'c');
+        var c1 = el('td', 'c');
+        var c2 = el('td', 'c');
+        var noteTd = el('td');
+
+        var seg = el('span', 'seg');
+        [0, 1, 2].forEach(function (v) {
+          var id = 'i-' + si + '-' + ii + '-' + v;
+          var input = document.createElement('input');
+          input.type = 'radio';
+          input.name = 'item-' + si + '-' + ii;
+          input.value = String(v);
+          input.id = id;
+          input.addEventListener('change', update);
+          var label = document.createElement('label');
+          label.setAttribute('for', id);
+          label.textContent = String(v);
+          seg.appendChild(input);
+          seg.appendChild(label);
+        });
+        c0.appendChild(seg);
+
+        var note = document.createElement('input');
+        note.type = 'text';
+        note.className = 'note-input';
+        note.id = 'note-' + si + '-' + ii;
+        note.placeholder = 'opsional';
+        note.addEventListener('input', update);
+        noteTd.appendChild(note);
+
+        tr.appendChild(no);
+        tr.appendChild(point);
+        tr.appendChild(c0);
+        tr.appendChild(c1);
+        tr.appendChild(c2);
+        tr.appendChild(noteTd);
+        tbody.appendChild(tr);
+        idx++;
+      });
+      table.appendChild(tbody);
+      host.appendChild(table);
+    });
+  }
+
+  function getValue(si, ii) {
+    var checked = document.querySelector('input[name="item-' + si + '-' + ii + '"]:checked');
+    return checked ? parseInt(checked.value, 10) : null;
+  }
+
+  function sectionScore(si) {
+    var sum = 0;
+    SECTIONS[si].items.forEach(function (_, ii) {
+      var v = getValue(si, ii);
+      if (v !== null) sum += v;
+    });
+    return sum;
+  }
+
+  function totalScore() {
+    var sum = 0;
+    SECTIONS.forEach(function (_, si) { sum += sectionScore(si); });
+    return sum;
+  }
+
+  function answeredCount() {
+    var n = 0;
+    SECTIONS.forEach(function (_, si) {
+      SECTIONS[si].items.forEach(function (_, ii) {
+        if (getValue(si, ii) !== null) n++;
+      });
+    });
+    return n;
+  }
+
+  function bandFor(total) {
+    if (total <= 20) return { key: 0, label: 'Risiko tinggi' };
+    if (total <= 35) return { key: 1, label: 'Berkembang' };
+    if (total <= 45) return { key: 2, label: 'Matang' };
+    return { key: 3, label: 'Best practice' };
+  }
+
+  function update() {
+    var total = totalScore();
+    var answered = answeredCount();
+    var band = bandFor(total);
+
+    document.getElementById('totalScore').textContent = total;
+    document.getElementById('bigScore').textContent = total;
+    document.getElementById('progText').textContent = answered + '/' + TOTAL_ITEMS;
+    document.getElementById('progBar').style.width = (answered / TOTAL_ITEMS * 100) + '%';
+
+    var bandLabel = document.getElementById('bandLabel');
+    bandLabel.textContent = answered === 0 ? 'Belum diisi' : band.label;
+
+    SECTIONS.forEach(function (_, si) {
+      var s = document.getElementById('secScore-' + si);
+      if (s) s.textContent = sectionScore(si) + '/10';
+    });
+
+    document.querySelectorAll('.band-row').forEach(function (row) {
+      row.classList.toggle('active', answered > 0 && parseInt(row.getAttribute('data-band'), 10) === band.key);
+    });
+  }
+
+  function buildMessage() {
+    var name = document.getElementById('custName').value.trim() || '-';
+    var company = document.getElementById('custCompany').value.trim() || '-';
+    var role = document.getElementById('custRole').value.trim() || '-';
+    var phone = document.getElementById('custPhone').value.trim() || '-';
+    var total = totalScore();
+    var answered = answeredCount();
+    var band = bandFor(total);
+
+    var lines = [];
+    lines.push('Halo Aseta, saya sudah mengisi Checklist Audit Aset.');
+    lines.push('');
+    lines.push('Nama: ' + name);
+    lines.push('Perusahaan: ' + company);
+    lines.push('Jabatan: ' + role);
+    lines.push('WhatsApp: ' + phone);
+    lines.push('');
+    lines.push('Skor total: ' + total + '/50 (' + band.label + ')');
+    lines.push('Terisi: ' + answered + '/' + TOTAL_ITEMS);
+    lines.push('');
+    lines.push('Rincian per bagian:');
+    SECTIONS.forEach(function (sec, si) {
+      lines.push(sec.letter + '. ' + sec.title + ': ' + sectionScore(si) + '/10');
+    });
+
+    var gaps = [];
+    SECTIONS.forEach(function (sec, si) {
+      sec.items.forEach(function (text, ii) {
+        var v = getValue(si, ii);
+        if (v !== null && v < 2) {
+          gaps.push('- ' + text + ' (' + v + ')');
+        }
+      });
+    });
+    lines.push('');
+    if (gaps.length) {
+      lines.push('Poin yang belum optimal:');
+      var shownGaps = gaps.slice(0, 12);
+      lines.push.apply(lines, shownGaps);
+      if (gaps.length > shownGaps.length) {
+        lines.push('…dan ' + (gaps.length - shownGaps.length) + ' poin lainnya.');
+      }
+    } else {
+      lines.push('Semua poin sudah optimal.');
+    }
+
+    var notes = [];
+    SECTIONS.forEach(function (sec, si) {
+      sec.items.forEach(function (text, ii) {
+        var n = document.getElementById('note-' + si + '-' + ii).value.trim();
+        if (n) notes.push('- ' + text + ': ' + n);
+      });
+    });
+    if (notes.length) {
+      lines.push('');
+      lines.push('Catatan:');
+      var shownNotes = notes.slice(0, 8);
+      lines.push.apply(lines, shownNotes);
+      if (notes.length > shownNotes.length) {
+        lines.push('…dan ' + (notes.length - shownNotes.length) + ' catatan lainnya.');
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+
+  function sendWa() {
+    var msg = buildMessage();
+    var url = 'https://wa.me/' + SALES_WA + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+  }
+
+  function copyResult() {
+    var msg = buildMessage();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg).then(function () {
+        toast('Hasil tersalin — tinggal paste ke WhatsApp');
+      }).catch(function () { fallbackCopy(msg); });
+    } else {
+      fallbackCopy(msg);
+    }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('Hasil tersalin'); }
+    catch (e) { toast('Gagal menyalin — gunakan tombol WhatsApp'); }
+    document.body.removeChild(ta);
+  }
+
+  function resetAll() {
+    document.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+    document.querySelectorAll('.note-input').forEach(function (n) { n.value = ''; });
+    ['custName', 'custCompany', 'custRole', 'custPhone'].forEach(function (id) {
+      document.getElementById(id).value = '';
+    });
+    update();
+    toast('Form direset');
+  }
+
+  render();
+  update();
+
+  document.getElementById('btnWa').addEventListener('click', sendWa);
+  document.getElementById('btnCopy').addEventListener('click', copyResult);
+  document.getElementById('btnPrint').addEventListener('click', function () { window.print(); });
+  document.getElementById('btnReset').addEventListener('click', resetAll);
+})();
+</script>
+</body>
+</html>
