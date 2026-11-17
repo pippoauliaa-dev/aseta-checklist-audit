@@ -4,28 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checklist Audit Aset — Aseta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --surface: #fcfcfb;
-    --page: #f4f3ef;
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --muted: #898781;
-    --grid: #e1e0d9;
-    --line: #c3c2b7;
-    --blue: #2a78d6;
-    --blue-soft: #eaf2fc;
-    --good: #0ca30c;
-    --warn: #fab219;
-    --bad: #d03b3b;
-    --chip: #f0efec;
+    --surface: #ffffff;
+    --page: #f1f5fb;
+    --ink: #172033;
+    --ink-2: #475569;
+    --muted: #64748b;
+    --grid: #dce4ee;
+    --line: #cbd5e1;
+    --navy: #173b78;
+    --blue: #1c58b7;
+    --blue-soft: #eef5ff;
+    --gold: #f3b000;
+    --good: #047857;
+    --warn: #f3b000;
+    --bad: #b91c1c;
+    --chip: #f1f5f9;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--page);
     color: var(--ink);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: 12.5px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -37,14 +42,17 @@
     border: 1px solid var(--grid);
     border-radius: 12px;
     padding: 32px 36px 28px;
-    box-shadow: 0 1px 2px rgba(11,11,11,0.04), 0 12px 32px rgba(11,11,11,0.06);
+    box-shadow: 0 12px 30px rgba(23,59,120,0.08);
   }
   .brand {
     display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 20px;
+    border-bottom: 2px solid var(--navy); padding-bottom: 12px; margin-bottom: 20px;
+    position: relative;
   }
-  .brand .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
-  .brand .logo span { color: var(--blue); }
+  .brand::after {
+    content: ''; position: absolute; left: 0; bottom: -2px; width: 64px; height: 2px; background: var(--gold);
+  }
+  .brand .logo img { height: 28px; width: auto; display: block; }
   .brand .meta { font-size: 10.5px; color: var(--muted); text-align: right; line-height: 1.4; }
   h1 { font-size: 23px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.02em; }
   .sub { color: var(--ink-2); margin: 0 0 16px; font-size: 12.5px; }
@@ -120,12 +128,12 @@
     font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer;
     background: var(--surface); user-select: none; transition: all 0.12s ease;
   }
-  .seg label:hover { border-color: var(--ink); color: var(--ink); }
-  .seg input:checked + label { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .seg label:hover { border-color: var(--navy); color: var(--ink); }
+  .seg input:checked + label { background: var(--navy); color: #fff; border-color: var(--navy); }
   .seg input:focus-visible + label { outline: 2px solid var(--blue); outline-offset: 1px; }
 
   .score {
-    margin-top: 22px; border: 1.5px solid var(--ink); border-radius: 10px;
+    margin-top: 22px; border: 1.5px solid var(--navy); border-radius: 10px;
     padding: 16px 18px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px;
   }
   .score .total { border-right: 1px solid var(--grid); padding-right: 18px; }
@@ -148,8 +156,8 @@
     border-radius: 9px; padding: 11px 16px; font-family: inherit; font-size: 12.5px;
     font-weight: 700; cursor: pointer; transition: all 0.12s ease;
   }
-  .btn:hover { border-color: var(--ink); }
-  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn:hover { border-color: var(--navy); }
+  .btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
   .btn.primary:hover { opacity: 0.9; }
   .btn.wa { background: #25d366; color: #063b1c; border-color: #25d366; }
   .btn.wa:hover { opacity: 0.92; }
@@ -157,7 +165,7 @@
   .actions .hint { font-size: 10.5px; color: var(--muted); margin-left: auto; }
 
   .cta {
-    margin-top: 20px; background: var(--ink); color: #fff; border-radius: 10px;
+    margin-top: 20px; background: var(--navy); color: #fff; border-radius: 10px;
     padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
   }
   .cta .t { font-size: 13px; font-weight: 700; margin: 0 0 2px; }
@@ -169,7 +177,7 @@
 
   .toast {
     position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
-    background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 9px;
+    background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 9px;
     font-size: 12px; opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 50;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -198,7 +206,7 @@
 <div class="sheet">
 
   <div class="brand">
-    <div class="logo">aseta<span>.</span></div>
+    <div class="logo"><img src="assets/aseta-brand-logo.png" alt="Aseta"></div>
     <div class="meta">Asset Management · RFID<br>aseta.id · 0812-1798-4959</div>
   </div>
 
